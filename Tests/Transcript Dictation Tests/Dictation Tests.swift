@@ -23,8 +23,8 @@
         }
 
         @Test func `Dutch speech is heard as timed words that align to its script, with its pause`() async throws {
-            let script = Transcript.Script("De kat sliep op de mat.\n\nToen kwam de regen, en de donderwolken trokken over het dorp.")
-            let path = try Self.spoken("De kat sliep op de mat. [[slnc 1500]] Toen kwam de regen, en de donderwolken trokken over het dorp.")
+            let script = Transcript.Script("De kat sliep op de mat.\n\nDaarna viel de sneeuw, en de molen draaide langzaam boven het veld.")
+            let path = try Self.spoken("De kat sliep op de mat. [[slnc 1500]] Daarna viel de sneeuw, en de molen draaide langzaam boven het veld.")
             defer { try? FileManager.default.removeItem(atPath: path) }
             let transcript = try await Transcript(dictating: try Path(validating: path), in: Self.dutch)
             let alignment = Transcript.Alignment(script, to: transcript)

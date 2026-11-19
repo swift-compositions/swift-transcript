@@ -59,9 +59,9 @@ import Transcript
     }
 
     @Test func `a compound heard as two words is one word spanning both`() {
-        let alignment = Transcript.Alignment(.init("de donderwolken kwamen"), to: Self.spoken("de donder wolken kwamen"))
+        let alignment = Transcript.Alignment(.init("de zonnebloemen groeiden"), to: Self.spoken("de zonne bloemen groeiden"))
         #expect(alignment.words.count == 3)
-        #expect(alignment.words[1].heard?.words.map(\.text) == ["donder", "wolken"])
+        #expect(alignment.words[1].heard?.words.map(\.text) == ["zonne", "bloemen"])
         #expect(alignment.words[1].heard?.exact == true)
         let third = Self.third
         #expect(alignment.words[1].heard?.span == third..<(third * 3))
@@ -69,7 +69,7 @@ import Transcript
     }
 
     @Test func `two words heard as one share its time by their letters`() throws {
-        let alignment = Transcript.Alignment(.init("hij keek over het dorp"), to: Self.spoken("hij keek overhet dorp"))
+        let alignment = Transcript.Alignment(.init("zij liep over het veld"), to: Self.spoken("zij liep overhet veld"))
         let over = alignment.words[2].heard
         let het = alignment.words[3].heard
         let third = Self.third
@@ -81,33 +81,33 @@ import Transcript
     }
 
     @Test func `a line read twice is timed by its last reading`() {
-        let alignment = Transcript.Alignment(.init("het lampje brandde"), to: Self.spoken("het lampje | het lampje brandde"))
-        #expect(alignment.extras.map(\.word.text) == ["het", "lampje"])
+        let alignment = Transcript.Alignment(.init("de oude brug kraakte"), to: Self.spoken("de oude | de oude brug kraakte"))
+        #expect(alignment.extras.map(\.word.text) == ["de", "oude"])
         #expect(alignment.extras.map(\.after) == [nil, nil])
         let second = alignment.transcript.words[2].span
         #expect(alignment.words[0].heard?.span == second)
     }
 
     @Test func `an accent for stress does not count`() {
-        let alignment = Transcript.Alignment(.init("Dat was één idee, dát wél."), to: Self.spoken("dat was een idee dat wel"))
+        let alignment = Transcript.Alignment(.init("Hij zei één keer: dát niet."), to: Self.spoken("hij zei een keer dat niet"))
         #expect(alignment.words.allSatisfy { $0.heard?.exact == true })
-        let decomposed = Transcript.Alignment(.init("ide\u{65}\u{308}en"), to: Self.spoken("ideeen"))
+        let decomposed = Transcript.Alignment(.init("re\u{75}\u{308}nie"), to: Self.spoken("reunie"))
         #expect(decomposed.words.allSatisfy { $0.heard?.exact == true })
     }
 
     @Test func `a word heard as itself is not joined into its neighbour's slip`() {
-        let alignment = Transcript.Alignment(.init("ging verder. De brandstof"), to: Self.spoken("ging ver De brandstof"))
+        let alignment = Transcript.Alignment(.init("een wonder. De zonnebloem"), to: Self.spoken("een won De zonnebloem"))
         #expect(alignment.words[2].heard?.words.map(\.text) == ["De"])
-        #expect(alignment.words[3].heard?.words.map(\.text) == ["brandstof"])
+        #expect(alignment.words[3].heard?.words.map(\.text) == ["zonnebloem"])
         #expect(alignment.words[2].heard?.exact == true)
         #expect(alignment.words[3].heard?.exact == true)
     }
 
     @Test func `numbers count by their digits`() {
-        let alignment = Transcript.Alignment(.init("In 2009 schreef hij"), to: Self.spoken("in 2009 schreef hij"))
+        let alignment = Transcript.Alignment(.init("In 1964 tekende zij"), to: Self.spoken("in 1964 tekende zij"))
         #expect(alignment.words.allSatisfy { $0.heard?.exact == true })
-        let words = Transcript.Alignment(.init("In 2009 schreef hij"), to: Self.spoken("in tweeduizendnegen schreef hij"))
-        #expect(words.missing.map(\.script.text) == ["2009"])
+        let words = Transcript.Alignment(.init("In 1964 tekende zij"), to: Self.spoken("in negentienvierenzestig tekende zij"))
+        #expect(words.missing.map(\.script.text) == ["1964"])
     }
 
     @Test func `paragraphs end at a blank line and lines count within them`() {

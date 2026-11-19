@@ -25,6 +25,11 @@ let package = Package(
         .package(url: "https://github.com/swift-atoms/swift-ordinal.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-path.git", branch: "main"),
         .package(url: "https://github.com/swift-ietf/swift-rfc-5646.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-compositions/swift-sound.git",
+            branch: "main",
+            traits: [.trait(name: "Decoding", condition: .when(traits: ["Dictation"]))]
+        ),
     ],
     targets: [
         .target(
@@ -41,8 +46,9 @@ let package = Package(
             dependencies: [
                 .target(name: "Transcript"),
                 .product(name: "Path", package: "swift-path", condition: .when(traits: ["Dictation"])),
-                .product(name: "Path Foundation Integration", package: "swift-path", condition: .when(traits: ["Dictation"])),
                 .product(name: "RFC 5646", package: "swift-rfc-5646", condition: .when(traits: ["Dictation"])),
+                .product(name: "Sound", package: "swift-sound", condition: .when(traits: ["Dictation"])),
+                .product(name: "Sound Decoding", package: "swift-sound", condition: .when(traits: ["Dictation"])),
             ]
         ),
         .testTarget(
@@ -58,6 +64,7 @@ let package = Package(
                 .target(name: "Transcript Dictation"),
                 .product(name: "Path", package: "swift-path"),
                 .product(name: "RFC 5646", package: "swift-rfc-5646"),
+                .product(name: "Sound", package: "swift-sound"),
             ]
         ),
     ],

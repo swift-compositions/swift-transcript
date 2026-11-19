@@ -2,6 +2,8 @@
     import Foundation
     import Path
     import RFC_5646
+    import Rational
+    import Sound
     import Testing
     import Transcript_Dictation
 
@@ -36,6 +38,41 @@
             #expect(pauses.count == 1)
             let mat = alignment.words[5].heard?.span.upperBound
             #expect(pauses.first?.lowerBound == mat)
+        }
+
+        @Test func `a long sound is heard in pieces within the longest, cut in its silences, that cover it`() throws {
+            let burst = [Float](repeating: 0.3, count: 2000) + [Float](repeating: 0, count: 500)
+            let sound = try Signal(rate: Rate(1000), channels: [Array(Array(repeating: burst, count: 10).joined())])
+            let pieces = Transcript.Dictation.pieces(of: sound)
+            #expect(pieces.first?.lowerBound == .zero)
+            #expect(pieces.last?.upperBound == sound.duration)
+            #expect(zip(pieces, pieces.dropFirst()).allSatisfy { $0.upperBound == $1.lowerBound })
+            #expect(pieces.allSatisfy { $0.upperBound - $0.lowerBound <= Transcript.Dictation.longest })
+            #expect(pieces.count == 4)
+        }
+
+        @Test func `a sound with no silence is one piece`() throws {
+            let sound = try Signal(rate: Rate(1000), channels: [[Float](repeating: 0.3, count: 20_000)])
+            #expect(Transcript.Dictation.pieces(of: sound) == [Rational.zero..<Rational(20)])
+        }
+
+        @Test func `a long Dutch reading is heard whole, every sentence at its time`() async throws {
+            let sentences = [
+                "De molenaar liep elke ochtend naar de rivier.",
+                "Daar telde hij de boten die voorbij kwamen.",
+                "Hij wilde weten hoeveel graan er naar de stad ging.",
+                "Zijn dochter schreef de getallen in een schrift.",
+                "Op zondag rustte de molen en zat hij op de brug.",
+                "Dan keek hij naar de eenden in het water.",
+            ]
+            let script = Transcript.Script(sentences.joined(separator: "\n\n"))
+            let path = try Self.spoken(sentences.joined(separator: " [[slnc 700]] "))
+            defer { try? FileManager.default.removeItem(atPath: path) }
+            let transcript = try await Transcript(dictating: try Path(validating: path), in: Self.dutch)
+            let alignment = Transcript.Alignment(script, to: transcript)
+            #expect(alignment.missing.count <= 2, "\(alignment.missing.map(\.script.text))")
+            let starts = alignment.words.compactMap { $0.heard?.span.lowerBound }
+            #expect(starts == starts.sorted())
         }
 
         @Test func `a file that is not audio cannot be heard`() async throws {

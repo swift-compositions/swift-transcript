@@ -1,0 +1,11 @@
+# .github/metadata.yaml
+description: "Speech as timed words for Swift: a transcript, a known text aligned to it, its pace and pauses, and on-device dictation."
+topics:
+  - compositions
+  - speech
+  - transcript
+  - alignment
+homepage: "https://swift-institute.org"
+readme:
+  family: E
+platforms: apple
